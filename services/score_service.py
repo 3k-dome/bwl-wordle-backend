@@ -58,6 +58,7 @@ class ScoreService(ResettableBase):
             score = ScoreService.calculate_score(word_length, max_tries, taken_tries, found_letters)
             won = found_letters == word_length
             hit_rate = found_letters / word_length
+
             # add the new score
             self.app.db.session.add(
                 Score(
