@@ -6,7 +6,7 @@ from flask import Flask
 # in 'models.__init__.py', this means 'db.create_all()' already knows about them
 from blueprints import create_blueprints
 from models import db
-from util import load_settings_file, setup_difficulties
+from util import load_settings_file, load_words, setup_difficulties
 
 SETTINGS = load_settings_file(Path(__file__).parent / "settings.json")
 
@@ -30,6 +30,7 @@ app = create_app_with_db()
 
 # setup our basic entries if those are empty
 setup_difficulties(app, SETTINGS["difficulties"])
+load_words(app, Path(__file__).parent / "assets" / "words.json")
 
 # register all blueprints
 [
