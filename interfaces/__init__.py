@@ -56,8 +56,9 @@ class AddedScore:
 
 @dataclass
 class ScoreSummary:
-    tries: int
+    max_tries: int
+    avg_taken_tries: float
     played: int
     won: int
     win_rate: float
-    hit_rate: float
+    avg_hit_rate: float

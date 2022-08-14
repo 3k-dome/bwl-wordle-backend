@@ -57,7 +57,8 @@ class ScoreService(ResettableBase):
             # calculate metrics
             score = ScoreService.calculate_score(word_length, max_tries, taken_tries, found_letters)
             won = found_letters == word_length
-            hit_rate = (found_letters / word_length,)
+            hit_rate = found_letters / word_length
+
             # add the new score
             self.app.db.session.add(
                 Score(
@@ -65,6 +66,7 @@ class ScoreService(ResettableBase):
                     difficulty_id=difficultly.id,
                     score=score,
                     won=won,
+                    taken_tries=taken_tries,
                     hit_rate=hit_rate,
                 )
             )
@@ -79,8 +81,9 @@ class ScoreService(ResettableBase):
     def get_summery_by_records(self, records: List[Score], tries: int = 0) -> ScoreSummary:
         won_games = sum([record.won for record in records])
         win_rate = won_games / len(records) if records else 0
+        avg_taken_tries = sum([record.taken_tries for record in records]) / len(records) if records else 0
         avg_hit_rate = sum([record.hit_rate for record in records]) / len(records) if records else 0
-        return ScoreSummary(tries, len(records), won_games, win_rate, avg_hit_rate)
+        return ScoreSummary(tries, avg_taken_tries, len(records), won_games, win_rate, avg_hit_rate)
 
     def get_summery(self, username: str) -> List[ScoreSummary]:
         results = []
@@ -91,5 +94,5 @@ class ScoreService(ResettableBase):
             # summary by difficulty
             for difficulty in Difficulty.query.all():
                 records = Score.query.filter_by(user_id=user.id).filter_by(difficulty_id=difficulty.id).all()
-                results.append(self.get_summery_by_records(user.scores, difficulty.tries))
+                results.append(self.get_summery_by_records(records, difficulty.tries))
         return results

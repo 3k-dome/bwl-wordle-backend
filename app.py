@@ -9,7 +9,7 @@ from flask_jwt_extended import JWTManager
 # in 'models.__init__.py', this means 'db.create_all()' already knows about them
 from blueprints import create_blueprints
 from models import db
-from util import load_settings_file, load_words, setup_difficulties
+from util import load_settings_file, load_words, setup_difficulties, print_map
 
 SETTINGS = load_settings_file(Path(__file__).parent / "settings.json")
 
@@ -46,10 +46,9 @@ load_words(app, Path(__file__).parent / "assets" / "words.json")
 # register all blueprints
 [
     app.register_blueprint(blueprint)
-    for blueprint in create_blueprints(
-        app, ip=SETTINGS["host"], port=SETTINGS["port"], daily=SETTINGS["daily"], interval=SETTINGS["interval"]
-    )
+    for blueprint in create_blueprints(app, ip=SETTINGS["host"], port=SETTINGS["port"], daily=SETTINGS["daily"], interval=SETTINGS["interval"])
 ]
+print_map(app)
 
 # start app
 app.run(host=SETTINGS["host"], port=SETTINGS["port"])
