@@ -1,6 +1,8 @@
 from pathlib import Path
+from typing import Tuple
 
 from flask import Flask
+from flask_jwt_extended import JWTManager
 
 # the magic to associate our 'db' object with all our needed models happens
 # in 'models.__init__.py', this means 'db.create_all()' already knows about them
@@ -25,8 +27,15 @@ def create_app_with_db() -> Flask:
     return app
 
 
+def add_jwt_context(app: Flask) -> Tuple[Flask, JWTManager]:
+    app.config["JWT_SECRET_KEY"] = SETTINGS["secret"]
+    jwt = JWTManager(app)
+    return app, jwt
+
+
 # create app and bind database
 app = create_app_with_db()
+app, jwt = add_jwt_context(app)
 
 # setup our basic entries if those are empty
 setup_difficulties(app, SETTINGS["difficulties"])

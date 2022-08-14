@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from flask import Blueprint, Flask, jsonify, request
+from flask import Blueprint, Flask, request
 from interfaces import jsonify_interface
 from services import GameService
 
