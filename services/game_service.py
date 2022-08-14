@@ -17,6 +17,7 @@ class GameService(ResettableBase):
         self.reset()
 
     def reset(self) -> None:
+        self.updated = datetime.now()
         try:
             with self.app.app_context():
                 # update and select can not be in the same 'request' because we need to

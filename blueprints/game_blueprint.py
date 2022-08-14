@@ -32,9 +32,9 @@ def create_game_blueprints(app: Flask, daily: bool, interval: int) -> Tuple[Blue
     def get_word():
         return game_service.get_word_info()
 
-    @debug_blueprint.route("/set_word", methods=["GET"])
-    @jsonify_interface
-    def set_word():
-        return game_service.force_reset()
+    # @debug_blueprint.route("/set_word", methods=["GET"])
+    # @jsonify_interface
+    # def set_word():
+    #     return game_service.force_reset()
 
     return game_blueprint, debug_blueprint
