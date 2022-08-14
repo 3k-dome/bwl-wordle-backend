@@ -4,6 +4,7 @@ from flask import Flask
 
 # the magic to associate our 'db' object with all our needed models happens
 # in 'models.__init__.py', this means 'db.create_all()' already knows about them
+from blueprints import create_blueprints
 from models import db
 from util import load_settings_file, setup_difficulties
 
@@ -29,6 +30,12 @@ app = create_app_with_db()
 
 # setup our basic entries if those are empty
 setup_difficulties(app, SETTINGS["difficulties"])
+
+# register all blueprints
+[
+    app.register_blueprint(blueprint)
+    for blueprint in create_blueprints(app, daily=SETTINGS["daily"], interval=SETTINGS["interval"])
+]
 
 # start app
 app.run(host=SETTINGS["host"], port=SETTINGS["port"])

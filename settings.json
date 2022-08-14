@@ -1,6 +1,8 @@
 {
     "host": "0.0.0.0",
     "port": "8000",
+    "daily": true,
+    "interval": 240,
     "difficulties": [
         {
             "name": "Easy",
