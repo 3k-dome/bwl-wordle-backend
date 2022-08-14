@@ -27,16 +27,7 @@ class ScoreService(ResettableBase):
     def calculate_score(word_length: int, max_tries: int, taken_tries: int, found_letters: int) -> int:
         return word_length + max_tries + taken_tries + found_letters
 
-    @depends_on_reset
-    def add_score(
-        self, username: str, max_tries: int = None, taken_tries: int = None, found_letters: int = None, **kwargs
-    ) -> Status:
-
-        # all of those are required
-        if not username or not max_tries or not taken_tries or not found_letters:
-            return Status.Empty
-
-        # check the last score of this user
+    def can_add_score(self, username: str) -> Status:
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
             latest_score = Score.query.filter_by(user_id=user.id).order_by(desc(Score.date)).first()
@@ -47,19 +38,35 @@ class ScoreService(ResettableBase):
                     return Status.Error
                 if not self.daily and (latest_score.date - self.updated).seconds < self.interval:
                     return Status.Error
+        return Status.Ok
 
+    @depends_on_reset
+    def add_score(self, username: str, max_tries: int = None, taken_tries: int = None, found_letters: int = None, **kwargs) -> Status:
+        # we need all of those
+        if not username or not max_tries or not taken_tries or not found_letters:
+            return Status.Empty
+        # check the last score of this user
+        can_add_score_status = self.can_add_score(username)
+        if can_add_score_status != Status.Ok:
+            return can_add_score_status
         # if we are still here calculate and add the score
         word_length = requests.get(f"http://{self.ip}:{self.port}/api/game/new_game").json()["length"]
-        score = ScoreService.calculate_score(word_length, max_tries, taken_tries, found_letters)
-        difficultly = Difficulty.query.filter_by(tries=max_tries).first()
         with self.app.app_context():
+            difficultly = Difficulty.query.filter_by(tries=max_tries).first()
+            user = User.query.filter_by(username=username).first()
+            # calculate metrics
+            score = ScoreService.calculate_score(word_length, max_tries, taken_tries, found_letters)
+            won = found_letters == word_length
+            hit_rate = found_letters / word_length
+            # add the new score
             self.app.db.session.add(
                 Score(
                     user_id=user.id,
                     difficulty_id=difficultly.id,
                     score=score,
-                    won=(found_letters == word_length),
-                    hit_rate=(found_letters / word_length),
+                    won=won,
+                    taken_tries=taken_tries,
+                    hit_rate=hit_rate,
                 )
             )
             self.app.db.session.commit()
@@ -70,43 +77,21 @@ class ScoreService(ResettableBase):
             user = User.query.filter_by(username=username).first()
             return AddedScore(user.scores[-1].score, sum([record.score for record in user.scores]))
 
+    def get_summery_by_records(self, records: List[Score], tries: int = 0) -> ScoreSummary:
+        won_games = sum([record.won for record in records])
+        win_rate = won_games / len(records) if records else 0
+        avg_taken_tries = sum([record.taken_tries for record in records]) / len(records) if records else 0
+        avg_hit_rate = sum([record.hit_rate for record in records]) / len(records) if records else 0
+        return ScoreSummary(tries, avg_taken_tries, len(records), won_games, win_rate, avg_hit_rate)
+
     def get_summery(self, username: str) -> List[ScoreSummary]:
-        result = []
+        results = []
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
-
-            # total
-            won = 0
-            hit = 0
-            records = user.scores
-            for record in records:
-                won += record.won
-                hit += record.hit_rate
-            result.append(
-                ScoreSummary(
-                    0,
-                    len(user.scores),
-                    won,
-                    won / len(records) if records else 0,
-                    hit / len(records) if records else 0,
-                )
-            )
-
-            # by difficulty
+            # summary for all games
+            results.append(self.get_summery_by_records(user.scores))
+            # summary by difficulty
             for difficulty in Difficulty.query.all():
                 records = Score.query.filter_by(user_id=user.id).filter_by(difficulty_id=difficulty.id).all()
-                won = 0
-                hit = 0
-                for record in records:
-                    won += record.won
-                    hit += record.hit_rate
-                result.append(
-                    ScoreSummary(
-                        difficulty.tries,
-                        len(records),
-                        won,
-                        won / len(records) if records else 0,
-                        hit / len(records) if records else 0,
-                    )
-                )
-        return result
+                results.append(self.get_summery_by_records(records, difficulty.tries))
+        return results

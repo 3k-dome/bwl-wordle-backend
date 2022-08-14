@@ -10,6 +10,7 @@ class Score(db.Model):
     date = db.Column(db.DateTime, unique=False, nullable=False, default=datetime.now)
     score = db.Column(db.Integer, unique=False, nullable=False)
     won = db.Column(db.Boolean, unique=False, nullable=False)
+    taken_tries = db.Column(db.Integer, unique=False, nullable=False)
     hit_rate = db.Column(db.Float, unique=False, nullable=False)
     # relationships
     user = db.relationship("User", backref=db.backref("scores", lazy=True))
