@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Tuple
 
 from flask import Flask
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
 # the magic to associate our 'db' object with all our needed models happens
@@ -36,6 +37,7 @@ def add_jwt_context(app: Flask) -> Tuple[Flask, JWTManager]:
 # create app and bind database
 app = create_app_with_db()
 app, jwt = add_jwt_context(app)
+CORS(app)
 
 # setup our basic entries if those are empty
 setup_difficulties(app, SETTINGS["difficulties"])
