@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from flask import Blueprint, Flask, abort, request
+from flask import Blueprint, Flask, jsonify, request
 from interfaces import jsonify_interface
 from services import GameService
 
@@ -21,9 +21,7 @@ def create_game_blueprints(app: Flask, daily: bool, interval: int) -> Tuple[Blue
     @game_blueprint.route("/validate_input", methods=["POST"])
     @jsonify_interface
     def validate_input():
-        if "input" not in request.json:
-            abort(400, "Field 'input' was missing in requests json.")
-        return game_service.get_validated_word()
+        return game_service.get_validated_word(**request.json)
 
     # debug blueprint
 

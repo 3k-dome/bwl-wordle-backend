@@ -52,7 +52,8 @@ class GameService(ResettableBase):
         return WordLength(len(self.selected_word.text))
 
     @depends_on_reset
-    def get_validated_word(self, word: str) -> ValidatedWord:
+    def get_validated_word(self, word: str = "", **kwargs) -> ValidatedWord:
+        word = word.lower()
         cache = set(self.selected_word.text)
         count = {letter: self.selected_word.text.count(letter) for letter in word}
         return ValidatedWord(
@@ -60,6 +61,6 @@ class GameService(ResettableBase):
             word == self.selected_word.text,
             [
                 ValidatedLetter(letter, letter in cache, letter == self.selected_word.text[i], count[letter] or 0)
-                for i, letter in enumerate(word)
+                for i, letter in enumerate(word[: self.selected_word.text.__len__()])
             ],
         )
