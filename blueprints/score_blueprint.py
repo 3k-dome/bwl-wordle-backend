@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from typing import Tuple
 
 from flask import Blueprint, Flask, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -6,11 +7,9 @@ from services import ScoreService
 from services.user_service import Status
 
 
-def create_score_blueprint(app: Flask, ip: str, port: str, daily: bool, interval: int) -> Blueprint:
+def create_score_blueprint(app: Flask, ip: str, port: str, daily: bool, interval: int) -> Tuple[Blueprint, ScoreService]:
 
     score_service = ScoreService(app, ip, port, daily, interval)
-
-    # score blueprint
 
     score_blueprint = Blueprint("Score", __name__, url_prefix="/score")
 
@@ -36,4 +35,4 @@ def create_score_blueprint(app: Flask, ip: str, port: str, daily: bool, interval
         username = get_jwt_identity()
         return jsonify([asdict(summary) for summary in score_service.get_summery(username)])
 
-    return score_blueprint
+    return score_blueprint, score_service
