@@ -46,3 +46,18 @@ class ValidatedWord:
     is_valid: bool
     is_word: bool
     letters: List[ValidatedLetter]
+
+
+@dataclass
+class AddedScore:
+    score: int
+    total_score: int
+
+
+@dataclass
+class ScoreSummary:
+    tries: int
+    played: int
+    won: int
+    win_rate: float
+    hit_rate: float

@@ -2,8 +2,8 @@
     "host": "0.0.0.0",
     "port": "8000",
     "secret": "QmllckJpZXJCaWVy=",
-    "daily": true,
-    "interval": 240,
+    "daily": false,
+    "interval": 30,
     "difficulties": [
         {
             "name": "Easy",

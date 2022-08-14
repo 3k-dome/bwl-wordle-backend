@@ -46,7 +46,9 @@ load_words(app, Path(__file__).parent / "assets" / "words.json")
 # register all blueprints
 [
     app.register_blueprint(blueprint)
-    for blueprint in create_blueprints(app, daily=SETTINGS["daily"], interval=SETTINGS["interval"])
+    for blueprint in create_blueprints(
+        app, ip=SETTINGS["host"], port=SETTINGS["port"], daily=SETTINGS["daily"], interval=SETTINGS["interval"]
+    )
 ]
 
 # start app
