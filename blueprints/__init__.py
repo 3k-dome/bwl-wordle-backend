@@ -2,11 +2,11 @@ from typing import Tuple
 
 from flask import Blueprint, Flask
 
-from services import game_service, score_service
 from interfaces import jsonify_interface
 from .game_blueprint import create_game_blueprints
 from .score_blueprint import create_score_blueprint
 from .user_blueprint import create_user_blueprint
+from .state_blueprint import create_state_blueprint
 
 
 def create_blueprints(app: Flask, ip: str, port: str, daily: bool, interval: int) -> Tuple[Blueprint, Blueprint]:
@@ -15,10 +15,12 @@ def create_blueprints(app: Flask, ip: str, port: str, daily: bool, interval: int
     api_blueprint = Blueprint("Api", __name__, url_prefix="/api")
 
     game, game_service = create_game_blueprints(app, daily, interval)
+    state, state_service = create_state_blueprint(app, daily, interval)
     score, score_service = create_score_blueprint(app, ip, port, daily, interval)
     user = create_user_blueprint(app)
 
     api_blueprint.register_blueprint(game)
+    api_blueprint.register_blueprint(state)
     api_blueprint.register_blueprint(score)
     api_blueprint.register_blueprint(user)
 
@@ -28,6 +30,7 @@ def create_blueprints(app: Flask, ip: str, port: str, daily: bool, interval: int
     @debug_blueprint.route("/set_word", methods=["GET"])
     @jsonify_interface
     def set_word():
+        state_service.reset()
         score_service.reset()
         return game_service.force_reset()
 
