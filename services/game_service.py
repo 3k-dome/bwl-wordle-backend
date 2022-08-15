@@ -1,9 +1,10 @@
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import List
 
 from flask import Flask
-from interfaces import ForcedReset, ValidatedLetter, ValidatedWord, WordInfo, WordLength
-from models import Word
+from interfaces import DifficultyInfo, ForcedReset, ValidatedLetter, ValidatedWord, WordInfo, WordLength
+from models import Word, Difficulty
 from sqlalchemy import desc
 
 from .resettable_base import ResettableBase, depends_on_reset
@@ -50,18 +51,27 @@ class GameService(ResettableBase):
 
     @depends_on_reset
     def get_word_length(self) -> WordLength:
-        return WordLength(len(self.selected_word.text))
+        return WordLength(
+            len(self.selected_word.text),
+            self.updated,
+            self.updated + timedelta(days=1) if self.daily else self.updated + timedelta(seconds=self.interval),
+        )
 
     @depends_on_reset
     def get_validated_word(self, word: str = "", **kwargs) -> ValidatedWord:
         word = word.lower()
         cache = set(self.selected_word.text)
         count = {letter: self.selected_word.text.count(letter) for letter in word}
-        return ValidatedWord(
-            True if Word.query.filter_by(text=word).all() else False,
-            word == self.selected_word.text,
-            [
-                ValidatedLetter(letter, letter in cache, letter == self.selected_word.text[i], count[letter] or 0)
-                for i, letter in enumerate(word[: self.selected_word.text.__len__()])
-            ],
-        )
+        with self.app.app_context():
+            return ValidatedWord(
+                True if Word.query.filter_by(text=word).all() else False,
+                word == self.selected_word.text,
+                [
+                    ValidatedLetter(letter, letter in cache, letter == self.selected_word.text[i], count[letter] or 0)
+                    for i, letter in enumerate(word[: self.selected_word.text.__len__()])
+                ],
+            )
+
+    def get_difficulties(self) -> List[DifficultyInfo]:
+        with self.app.app_context():
+            return [DifficultyInfo(record.name, record.tries) for record in Difficulty.query.all()]

@@ -31,6 +31,14 @@ class ForcedReset:
 @dataclass
 class WordLength:
     length: int
+    session_start: datetime
+    session_end: datetime
+
+
+@dataclass
+class DifficultyInfo:
+    name: str
+    tries: int
 
 
 @dataclass

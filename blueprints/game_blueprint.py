@@ -1,8 +1,9 @@
 from typing import Tuple
 
-from flask import Blueprint, Flask, request
+from flask import Blueprint, Flask, request, jsonify
 from interfaces import jsonify_interface
 from services import GameService
+from dataclasses import asdict
 
 
 def create_game_blueprints(app: Flask, daily: bool, interval: int) -> Tuple[Blueprint, GameService]:
@@ -20,5 +21,9 @@ def create_game_blueprints(app: Flask, daily: bool, interval: int) -> Tuple[Blue
     @jsonify_interface
     def validate_input():
         return game_service.get_validated_word(**request.json)
+
+    @game_blueprint.route("/difficulties", methods=["GET"])
+    def difficulties():
+        return jsonify([asdict(item) for item in game_service.get_difficulties()])
 
     return game_blueprint, game_service
