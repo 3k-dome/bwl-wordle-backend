@@ -25,7 +25,9 @@ class ScoreService(ResettableBase):
 
     @staticmethod
     def calculate_score(word_length: int, max_tries: int, taken_tries: int, found_letters: int) -> int:
-        return word_length + max_tries + taken_tries + found_letters
+        hit_rate = found_letters / word_length
+        tries_rate = taken_tries / max_tries
+        return int((50 * hit_rate) + (50 * tries_rate))
 
     def can_add_score(self, username: str) -> Status:
         with self.app.app_context():
@@ -76,7 +78,8 @@ class ScoreService(ResettableBase):
     def get_latest_score(self, username: str) -> AddedScore:
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
-            return AddedScore(user.scores[-1].score, sum([record.score for record in user.scores]))
+            records = Score.query.filter_by(user_id=user.id).order_by(desc(Score.date)).all()
+            return AddedScore(records[0].score, sum([record.score for record in records]))
 
     def get_summery_by_records(self, records: List[Score], tries: int = 0) -> ScoreSummary:
         won_games = sum([record.won for record in records])
@@ -89,8 +92,6 @@ class ScoreService(ResettableBase):
         results = []
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
-            # summary for all games
-            results.append(self.get_summery_by_records(user.scores))
             # summary by difficulty
             for difficulty in Difficulty.query.all():
                 records = Score.query.filter_by(user_id=user.id).filter_by(difficulty_id=difficulty.id).all()
