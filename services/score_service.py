@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import Dict, List
 
 import requests
 from flask import Flask
@@ -78,22 +78,28 @@ class ScoreService(ResettableBase):
     def get_latest_score(self, username: str) -> AddedScore:
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
-            records = Score.query.filter_by(user_id=user.id).order_by(desc(Score.date)).all()
-            return AddedScore(records[0].score, sum([record.score for record in records]))
+            # get the latest result
+            latest = Score.query.filter_by(user_id=user.id).order_by(desc(Score.date)).first()
+            # get all results with the selected difficulty of the latest
+            records = Score.query.filter_by(user_id=user.id).filter_by(difficulty_id=latest.difficulty_id).all()
+            return AddedScore(latest.score, sum([record.score for record in records]))
 
-    def get_summery_by_records(self, records: List[Score], tries: int = 0) -> ScoreSummary:
+    def get_summery_by_records(self, records: List[Score]) -> ScoreSummary:
+        no_played = len(records)
         won_games = sum([record.won for record in records])
-        win_rate = won_games / len(records) if records else 0
-        avg_taken_tries = sum([record.taken_tries for record in records]) / len(records) if records else 0
-        avg_hit_rate = sum([record.hit_rate for record in records]) / len(records) if records else 0
-        return ScoreSummary(tries, avg_taken_tries, len(records), won_games, win_rate, avg_hit_rate)
+        total_score = sum([record.score for record in records])
+        avg_score = total_score / no_played if records else 0
+        total_taken_tries = sum([record.taken_tries for record in records])
+        avg_taken_tries = total_taken_tries / no_played if records else 0
+        avg_hit_rate = sum([record.hit_rate for record in records]) / no_played if records else 0
+        return ScoreSummary(no_played, won_games, total_score, avg_score, total_taken_tries, avg_taken_tries,  avg_hit_rate)
 
-    def get_summery(self, username: str) -> List[ScoreSummary]:
-        results = []
+    def get_summery(self, username: str) -> Dict[int, ScoreSummary]:
+        results = {}
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
             # summary by difficulty
             for difficulty in Difficulty.query.all():
                 records = Score.query.filter_by(user_id=user.id).filter_by(difficulty_id=difficulty.id).all()
-                results.append(self.get_summery_by_records(records, difficulty.tries))
+                results[difficulty.id] = self.get_summery_by_records(records)
         return results

@@ -37,6 +37,7 @@ class WordLength:
 
 @dataclass
 class DifficultyInfo:
+    id: int
     name: str
     tries: int
 
@@ -64,9 +65,14 @@ class AddedScore:
 
 @dataclass
 class ScoreSummary:
-    max_tries: int
+    no_played: int 
+    no_won: int
+    total_score: int
+    avg_score: float
+    total_taken_tries : int
     avg_taken_tries: float
-    played: int
-    won: int
-    win_rate: float
     avg_hit_rate: float
+
+@dataclass
+class ScoreBoard:
+    pass

@@ -33,6 +33,6 @@ def create_score_blueprint(app: Flask, ip: str, port: str, daily: bool, interval
     @jwt_required()
     def summary():
         username = get_jwt_identity()
-        return jsonify([asdict(summary) for summary in score_service.get_summery(username)])
+        return jsonify({id: asdict(summary) for id, summary in score_service.get_summery(username).items()})
 
     return score_blueprint, score_service

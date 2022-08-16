@@ -74,4 +74,4 @@ class GameService(ResettableBase):
 
     def get_difficulties(self) -> List[DifficultyInfo]:
         with self.app.app_context():
-            return [DifficultyInfo(record.name, record.tries) for record in Difficulty.query.all()]
+            return [DifficultyInfo(record.id, record.name, record.tries) for record in Difficulty.query.all()]
