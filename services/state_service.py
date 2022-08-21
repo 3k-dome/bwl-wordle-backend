@@ -24,7 +24,11 @@ class StateService(ResettableBase):
     def save_state(self, username: str, json: Any = None) -> None:
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
-            self.app.db.session.merge(State(user_id=user.id, json=json))
+            old = State.query.filter_by(user_id=user.id).first()
+            if old:
+                old.json = json
+            else:
+                self.app.db.session.add(State(user_id=user.id, json=json))
             self.app.db.session.commit()
 
     @depends_on_reset

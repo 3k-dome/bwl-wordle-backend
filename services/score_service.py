@@ -26,7 +26,7 @@ class ScoreService(ResettableBase):
     @staticmethod
     def calculate_score(word_length: int, max_tries: int, taken_tries: int, found_letters: int) -> int:
         hit_rate = found_letters / word_length
-        tries_rate = taken_tries / max_tries
+        tries_rate = 1 - (taken_tries / max_tries)
         return int((50 * hit_rate) + (50 * tries_rate))
 
     def can_add_score(self, username: str) -> Status:
