@@ -8,6 +8,7 @@ from services.user_service import Status
 
 
 def create_score_blueprint(app: Flask, ip: str, port: str, daily: bool, interval: int) -> Tuple[Blueprint, ScoreService]:
+    """Blueprint to add and retrieve scores from the database."""
 
     score_service = ScoreService(app, ip, port, daily, interval)
 
@@ -16,6 +17,7 @@ def create_score_blueprint(app: Flask, ip: str, port: str, daily: bool, interval
     @score_blueprint.route("/add", methods=["POST"])
     @jwt_required()
     def add():
+        """Calculates and adds a new score to the database, also returns it."""
         username = get_jwt_identity()
         status = score_service.add_score(username, **request.json)
         match status:
@@ -32,6 +34,7 @@ def create_score_blueprint(app: Flask, ip: str, port: str, daily: bool, interval
     @score_blueprint.route("/summary", methods=["GET"])
     @jwt_required()
     def summary():
+        """Returns the summary of all played games of the calling player."""
         username = get_jwt_identity()
         return jsonify({id: asdict(summary) for id, summary in score_service.get_summery(username).items()})
 

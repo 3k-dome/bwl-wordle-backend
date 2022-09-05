@@ -10,6 +10,11 @@ from .state_blueprint import create_state_blueprint
 
 
 def create_blueprints(app: Flask, ip: str, port: str, daily: bool, interval: int) -> Tuple[Blueprint, Blueprint]:
+    """Creates all sub blueprints and registers them on an api blueprint.
+    
+    This method creates all other blueprints via their own factory methods
+    to inject all necessary parameters to those and their inner services. 
+    """
 
     # create main api blue print, which consists of our other blueprints
     api_blueprint = Blueprint("Api", __name__, url_prefix="/api")

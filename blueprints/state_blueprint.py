@@ -6,6 +6,7 @@ from services import StateService
 
 
 def create_state_blueprint(app: Flask, daily: bool, interval: int) -> Tuple[Blueprint, StateService]:
+    """Blueprint used to store game states."""
 
     state_service = StateService(app, daily, interval)
 
@@ -16,6 +17,7 @@ def create_state_blueprint(app: Flask, daily: bool, interval: int) -> Tuple[Blue
     @state_blueprint.route("/save", methods=["POST"])
     @jwt_required()
     def save():
+        """Adds or updates a stored state by the given json of a user."""
         username = get_jwt_identity()
         state_service.save_state(username, request.json)
         return jsonify({"msg": "Successfully saved."}), 201
@@ -23,6 +25,7 @@ def create_state_blueprint(app: Flask, daily: bool, interval: int) -> Tuple[Blue
     @state_blueprint.route("/load", methods=["GET"])
     @jwt_required()
     def load():
+        """Loads a stored state of the calling user and returns it."""
         username = get_jwt_identity()
         state = state_service.load_state(username)
         if state:

@@ -4,6 +4,7 @@ from services import Status, UserService
 
 
 def create_user_blueprint(app: Flask) -> Blueprint:
+    """User management blueprint."""
 
     user_service = UserService(app)
 
@@ -13,6 +14,7 @@ def create_user_blueprint(app: Flask) -> Blueprint:
 
     @user_blueprint.route("/register", methods=["POST"])
     def register():
+        """Registers a new user account."""
         _, status = user_service.add_user(**request.json)
         match status:
             case Status.Empty:
@@ -24,6 +26,7 @@ def create_user_blueprint(app: Flask) -> Blueprint:
 
     @user_blueprint.route("/login", methods=["POST"])
     def login():
+        """Tries to login a calling user, returns his jwt if successful."""
         _, status = user_service.get_user(**request.json)
         match status:
             case Status.Empty:
@@ -44,6 +47,7 @@ def create_user_blueprint(app: Flask) -> Blueprint:
     @user_blueprint.route("/delete", methods=["POST"])
     @jwt_required()
     def delete():
+        """Allows a user to delete his account."""
         _, status = user_service.del_user(**request.json)
         match status:
             case Status.Empty:
@@ -56,6 +60,7 @@ def create_user_blueprint(app: Flask) -> Blueprint:
     @user_blueprint.route("/logout", methods=["POST"])
     @jwt_required()
     def logout():
+        """Logout by disabling the given jwt."""
         response = jsonify({"msg": "Successfully logged out."})
         unset_jwt_cookies(response)
         return response
