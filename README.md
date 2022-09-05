@@ -28,7 +28,7 @@ python -m pip install -r requirements.txt
     "token_expires" : 3600,           <- number of seconds it takes for the jwt to expire as integer
     "daily": true,                    <- wether the cycle should update daily or not as boolean
     "interval": 900,                  <- length of a cycle in seconds as integer, requires daily = false
-    "difficulties": [                 <- a list of difficulties
+    "difficulties": [                 <- a list of difficulties, only red on first server start, delete database folder to reset
         {
             "name": "Easy",           <- name of the difficilty
             "tries": 9                <- number of allowed tries
