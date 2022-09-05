@@ -51,5 +51,11 @@ load_words(app, Path(__file__).parent / "assets" / "words.json")
 ]
 print_map(app)
 
+# default route
+
+@app.route("/", methods=["GET"])
+def default():
+    return app.send_static_file("index.html")
+
 # start app
 app.run(host=SETTINGS["host"], port=SETTINGS["port"])

@@ -1,5 +1,6 @@
 from flask import Flask
-
+from .database import load_words, setup_difficulties
+from .settings import load_settings_file
 
 def print_map(app: Flask) -> None:
     """Utility to print all available routes at startup."""
