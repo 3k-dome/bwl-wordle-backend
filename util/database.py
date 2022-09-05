@@ -7,6 +7,7 @@ from models import Difficulty, Word
 
 
 def setup_difficulties(app: Flask, difficulties: List[Dict[str, str | int]]) -> None:
+    """Adds all specified difficulties to the database."""
     if not app.db:
         raise Exception(
             "Database context needs to be set on the given app as 'app.db' see 'app.db = db' with 'db = SQLAlchemy()'."
@@ -20,6 +21,7 @@ def setup_difficulties(app: Flask, difficulties: List[Dict[str, str | int]]) -> 
 
 
 def load_words(app: Flask, filepath: Path) -> None:
+    """Adds all words to the database."""
     if not app.db:
         raise Exception(
             "Database context needs to be set on the given app as 'app.db' see 'app.db = db' with 'db = SQLAlchemy()'."

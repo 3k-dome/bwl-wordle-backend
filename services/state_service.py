@@ -8,6 +8,8 @@ from services.resettable_base import ResettableBase, depends_on_reset
 
 
 class StateService(ResettableBase):
+    """Service used to store states with in the db."""
+
     def __init__(self, app: Flask, daily: bool, interval: int) -> None:
         super().__init__(daily, interval)
         self.app = app
@@ -22,6 +24,7 @@ class StateService(ResettableBase):
 
     @depends_on_reset
     def save_state(self, username: str, json: Any = None) -> None:
+        """Adds or updates the state of a user."""
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
             old = State.query.filter_by(user_id=user.id).first()
@@ -33,6 +36,7 @@ class StateService(ResettableBase):
 
     @depends_on_reset
     def load_state(self, username: str) -> Dict | None:
+        """Loads the state of a user."""
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
             if user.state:
