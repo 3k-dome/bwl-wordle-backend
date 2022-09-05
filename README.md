@@ -17,3 +17,30 @@ python -m venv venv
 ./venv/Scripts/Activate.ps1
 python -m pip install -r requirements.txt
 ```
+
+# settings
+
+```
+{
+    "host": "0.0.0.0",                <- host ip as string
+    "port": "8000",                   <- port as string
+    "secret": "QmllckJpZXJCaWVy=",    <- jwt secret as string
+    "token_expires" : 3600,           <- number of seconds it takes for the jwt to expire as integer
+    "daily": true,                    <- wether the cycle should update daily or not as boolean
+    "interval": 900,                  <- length of a cycle in seconds as integer, requires daily = false
+    "difficulties": [                 <- a list of difficulties
+        {
+            "name": "Easy",           <- name of the difficilty
+            "tries": 9                <- number of allowed tries
+        },
+        {
+            "name": "Normal",
+            "tries": 6
+        },
+        {
+            "name": "Hard",
+            "tries": 3
+        }
+    ]
+}
+```
