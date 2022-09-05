@@ -25,11 +25,13 @@ class ScoreService(ResettableBase):
 
     @staticmethod
     def calculate_score(word_length: int, max_tries: int, taken_tries: int, found_letters: int) -> int:
+        """Returns a calculated score."""
         hit_rate = found_letters / word_length
-        tries_rate = 1 - (taken_tries / max_tries)
+        tries_rate = 1 - (taken_tries  - 1) / (max_tries - 1)
         return int((50 * hit_rate) + (50 * tries_rate))
 
     def can_add_score(self, username: str) -> Status:
+        """Checks wether a user is allowed to add his  score to the db."""
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
             latest_score = Score.query.filter_by(user_id=user.id).order_by(desc(Score.date)).first()
@@ -44,6 +46,7 @@ class ScoreService(ResettableBase):
 
     @depends_on_reset
     def add_score(self, username: str, max_tries: int = None, taken_tries: int = None, found_letters: int = None, **kwargs) -> Status:
+        """Adds the new score of a user to the db."""
         # we need all of those
         if not username or not max_tries or not taken_tries or not found_letters:
             return Status.Empty
@@ -60,7 +63,6 @@ class ScoreService(ResettableBase):
             score = ScoreService.calculate_score(word_length, max_tries, taken_tries, found_letters)
             won = found_letters == word_length
             hit_rate = found_letters / word_length
-
             # add the new score
             self.app.db.session.add(
                 Score(
@@ -76,6 +78,7 @@ class ScoreService(ResettableBase):
         return Status.Ok
 
     def get_latest_score(self, username: str) -> AddedScore:
+        """Returns the latest score of a user."""
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
             # get the latest result
@@ -85,6 +88,7 @@ class ScoreService(ResettableBase):
             return AddedScore(latest.score, sum([record.score for record in records]))
 
     def get_summery_by_records(self, records: List[Score]) -> ScoreSummary:
+        """Calculates any summary metrics and returns them."""
         no_played = len(records)
         won_games = sum([record.won for record in records])
         total_score = sum([record.score for record in records])
@@ -95,6 +99,7 @@ class ScoreService(ResettableBase):
         return ScoreSummary(no_played, won_games, total_score, avg_score, total_taken_tries, avg_taken_tries,  avg_hit_rate)
 
     def get_summery(self, username: str) -> Dict[int, ScoreSummary]:
+        """Gets and returns the summary of a calling player."""
         results = {}
         with self.app.app_context():
             user = User.query.filter_by(username=username).first()
