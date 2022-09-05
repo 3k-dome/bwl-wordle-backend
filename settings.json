@@ -2,8 +2,9 @@
     "host": "0.0.0.0",
     "port": "8000",
     "secret": "QmllckJpZXJCaWVy=",
-    "daily": false,
-    "interval": 30,
+    "token_expires" : 3600,
+    "daily": true,
+    "interval": 900,
     "difficulties": [
         {
             "name": "Easy",

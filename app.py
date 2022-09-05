@@ -30,6 +30,7 @@ def create_app_with_db() -> Flask:
 
 def add_jwt_context(app: Flask) -> Tuple[Flask, JWTManager]:
     app.config["JWT_SECRET_KEY"] = SETTINGS["secret"]
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = SETTINGS["token_expires"]
     jwt = JWTManager(app)
     return app, jwt
 
